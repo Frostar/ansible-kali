@@ -1,0 +1,74 @@
+---
+- name: Configure Kali
+  hosts: kali
+  become: true
+  become_method: ansible.builtin.sudo
+
+  tasks:
+    # Install packages
+    - name: Installing packages
+      ansible.builtin.package:
+        name:
+          - vim-common
+          - burpsuite
+          - cargo
+          - crackmapexec
+          - gobuster
+          - hashcat
+          - hydra
+          - john
+          - metasploit-framework
+          - nmap
+          - openvpn
+          - bloodhound
+          - seclists
+          - sqlmap
+          - wireshark
+          - wordlists
+          - syncthing
+          - curl
+          - git
+          - tmux
+          - python3-pwntools
+          - gdb-peda
+        state: present
+        use: apt
+
+    # Unpack rockyou.txt
+    - name: Unpack rockyou.txt
+      ansible.builtin.command:
+        cmd: gzip -d /usr/share/wordlists/rockyou.txt.gz
+      args:
+        creates: /usr/share/wordlists/rockyou.txt
+
+    # Ensure SSH password authentication is disabled
+    - name: Disable SSH password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+        state: present
+        backup: true
+
+    # Download Tmux configuration
+    - name: Download Tmux configuration
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/frostar/dotfiles/master/tmux/tmux.conf
+        dest: /home/kali/.tmux.conf
+        owner: kali
+        group: kali
+        mode: '0644'
+
+    # Enable syncthing
+    - name: Enable and start syncthing
+      ansible.builtin.systemd:
+        name: syncthing@kali
+        enabled: true
+        state: started
+
+    # Configure syncthing
+    - name: Configure syncthing
+      ansible.builtin.command:
+        cmd: syncthing -generate="/home/kali/.config/syncthing"
+      args:
+        creates: /home/kali/.config/syncthing
