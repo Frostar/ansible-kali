@@ -9,6 +9,8 @@
     - name: Installing packages
       ansible.builtin.package:
         name:
+          - spice-vdagent
+          - tldr
           - vim-common
           - burpsuite
           - cargo
@@ -37,7 +39,7 @@
     # Unpack rockyou.txt
     - name: Unpack rockyou.txt
       ansible.builtin.command:
-        cmd: gzip -d /usr/share/wordlists/rockyou.txt.gz
+        cmd: gunzip /usr/share/wordlists/rockyou.txt.gz
       args:
         creates: /usr/share/wordlists/rockyou.txt
 
